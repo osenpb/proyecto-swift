@@ -11,8 +11,14 @@ struct DashboardView: View {
 
     var body: some View {
         ZStack {
-            Map(coordinateRegion: $region, annotationItems: reportesDemo) { reporte in
-                MapMarker(coordinate: reporte.coordenada, tint: .red)
+            Map(position: .constant(.region(region))) {
+                ForEach(reportesDemo) { reporte in
+                    Annotation("", coordinate: reporte.coordenada) {
+                        Image(systemName: "mappin.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.red)
+                    }
+                }
             }
             .ignoresSafeArea()
 

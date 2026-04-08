@@ -31,18 +31,18 @@ struct CrearReporteView: View {
                                 .font(.caption)
                                 .foregroundStyle(.gray)
 
-                            Map(coordinateRegion: $region, annotationItems: [Reporte(coordenada: coordinate)]) { reporte in
-                                MapMarker(coordinate: reporte.coordenada, tint: .orange)
+                            Map(position: .constant(.region(region))) {
+                                Annotation("", coordinate: coordinate) {
+                                    Image(systemName: "mappin.circle.fill")
+                                        .font(.title)
+                                        .foregroundStyle(.orange)
+                                }
                             }
                             .frame(height: 200)
                             .cornerRadius(12)
-                            .gesture(
-                                DragGesture(minimumDistance: 0)
-                                    .onEnded { value in
-                                        let coordinate = region.center
-                                        self.coordinate = coordinate
-                                    }
-                            )
+                            .onMapCameraChange(frequency: .onEnd) { context in
+                                self.coordinate = context.region.center
+                            }
                         }
 
                         VStack(alignment: .leading, spacing: 8) {
