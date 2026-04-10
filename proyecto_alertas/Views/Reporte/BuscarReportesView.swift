@@ -6,10 +6,10 @@ struct BuscarReportesView: View {
     @State private var searchText: String = ""
     @State private var selectedDistrito: String? = nil
     @State private var reportes: [Reporte] = [
-        Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.05, longitude: -77.03), titulo: "Robo en tienda", descripcion: "Robo a mano armada en tienda de conveniencia", tipo: "Robo"),
-        Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.04, longitude: -77.05), titulo: "Asalto en calle", descripcion: "Asalto a transeúnte", tipo: "Asalto"),
-        Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.06, longitude: -77.04), titulo: "Robo de vehículo", descripcion: "Auto robado en estacionamiento", tipo: "Robo de vehículo"),
-        Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.03, longitude: -77.06), titulo: "Intento de robo", descripcion: "Intentaron robarme en el metro", tipo: "Robo")
+        Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.05, longitude: -77.03), titulo: "Robo en tienda", descripcion: "Robo a mano armada en tienda de conveniencia", tipo: "Robo", distrito: "Miraflores"),
+        Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.04, longitude: -77.05), titulo: "Asalto en calle", descripcion: "Asalto a transeúnte", tipo: "Asalto", distrito: "Lima"),
+        Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.06, longitude: -77.04), titulo: "Robo de vehículo", descripcion: "Auto robado en estacionamiento", tipo: "Robo de vehículo", distrito: "Surco"),
+        Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.03, longitude: -77.06), titulo: "Intento de robo", descripcion: "Intentaron robarme en el metro", tipo: "Robo", distrito: "Cercado")
     ]
 
     private let distritos = ["Lima", "Cercado", "Miraflores", "San Juan de Lurigancho", "Callao", "Surco", "Barranco"]
@@ -18,7 +18,7 @@ struct BuscarReportesView: View {
         var result = reportes
 
         if let distrito = selectedDistrito {
-            result = result.filter { _ in true }
+            result = result.filter { $0.distrito == distrito }
         }
 
         if !searchText.isEmpty {
@@ -135,7 +135,7 @@ struct ReporteCard: View {
                     .font(.caption)
                     .foregroundStyle(.gray)
 
-                Text("Lima")
+                Text(reporte.distrito)
                     .font(.caption)
                     .foregroundStyle(.gray)
             }
