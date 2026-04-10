@@ -5,7 +5,7 @@ struct CrearReporteView: View {
     @Binding var isPresented: Bool
     @State private var titulo: String = ""
     @State private var descripcion: String = ""
-    @State private var selectedTipo: TipoReporte = .robo
+    @State private var selectedTipo: String = "Robo"
     @State private var selectedDate: Date = Date()
     @State private var coordinate: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: -12.0464, longitude: -77.0428)
     @State private var region = MKCoordinateRegion(
@@ -13,6 +13,8 @@ struct CrearReporteView: View {
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
     @State private var isSaving: Bool = false
+
+    private let tipos = ["Robo", "Asalto", "Robo de vehículo"]
 
     var body: some View {
         NavigationStack {
@@ -51,8 +53,8 @@ struct CrearReporteView: View {
                                 .foregroundStyle(.white)
 
                             Picker("Tipo", selection: $selectedTipo) {
-                                ForEach(TipoReporte.allCases, id: \.self) { tipo in
-                                    Text(tipo.rawValue).tag(tipo)
+                                ForEach(tipos, id: \.self) { tipo in
+                                    Text(tipo).tag(tipo)
                                 }
                             }
                             .pickerStyle(.segmented)

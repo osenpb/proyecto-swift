@@ -6,7 +6,7 @@ struct Reporte: Identifiable, Equatable {
     var coordenada: CLLocationCoordinate2D
     var titulo: String = ""
     var descripcion: String = ""
-    var tipo: TipoReporte = .robo
+    var tipo: String = "Robo"
     var fecha: Date = Date()
     var usuarioId: String?
 
