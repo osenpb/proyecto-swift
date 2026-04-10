@@ -7,14 +7,33 @@ Aplicación iOS (SwiftUI) para reportar y visualizar casos de robo en tu zona.
 
 **Por qué MVVM:** SwiftUI es nativamente MVVM con `@StateObject`, `@Published`. Firebase + Maps requieren manejo de estado async = perfecto para ViewModels.
 
+## Flujo de Navegación Propuesto
+
+```
+LoginView → RegisterView
+           ↓
+      DashboardView (PANTALLA PRINCIPAL con mapa)
+      ├── Toolbar: Botón "Buscar" → sheet modal para buscar reportes por distrito
+      └── Toolbar: Botón "+" → sheet modal para crear nuevo reporte
+          └── fullScreenCover para formulario completo de creación
+```
+
 ## Pantallas
 
 1. **Login** - Autenticación de usuarios
 2. **Registro** - Crear nueva cuenta
-3. **Crear Reporte** - Formulario con mapa para reportar robos y visualizar casos recientes
-4. **Buscar Reporte** - Lista/búsqueda de reportes existentes
+3. **DashboardView (Principal)** - Mapa con markers de reportes recientes
+   - Toolbar con botón "Buscar" → abre modal de búsqueda por distrito
+   - Toolbar con botón "+" → abre modal de crear reporte
+   - Marker toca → sheet con detalles del reporte
+4. **Crear Reporte** - Modal (fullScreenCover) con formulario para reportar robos
+5. **Buscar Reporte** - Modal (sheet) con lista/búsqueda de reportes por distrito
 
-## Estructura del Proyecto
+## Cambios Recientes
+- Pantalla principal = Dashboard con mapa
+- "Crear Reporte" se abre como modal desde el mapa
+- "Buscar Reportes por Distrito" se abre como modal desde el mapa
+- Navegación simple: solo mapa como pantalla principal post-login
 
 ```
 proyecto_alertas/
@@ -53,10 +72,12 @@ LoginView → RegisterView
 ## Componentes UI
 
 ```
-├── DashboardView        # Pantalla principal con mapa
-├── ReporteDetailSheet   # Modal - ver detalles al tocar marker
-├── CrearReporteSheet    # Modal - formulario crear reporte (fullScreenCover)
-└── FloatingActionButton # Botón flotante (+) en el mapa
+├── DashboardView           # Pantalla principal con mapa
+├── ReporteDetailSheet      # Modal - ver detalles al tocar marker
+├── CrearReporteView        # Modal (fullScreenCover) - formulario crear reporte
+├── BuscarReportesView      # Modal (sheet) - buscar reportes por distrito
+├── FloatingActionButton   # Botón flotante (+) en el mapa
+└── ToolbarButtons         # Botones en toolbar del mapa
 ```
 
 ## Dependencias

@@ -1,10 +1,17 @@
 import SwiftUI
 import MapKit
+import CoreLocation
 
 struct DashboardView: View {
     @Binding var isAuthenticated: Bool
     @State private var showCrearReporte: Bool = false
-    @State private var region = MKCoordinateRegion(
+    @State private var showBuscarReportes: Bool = false
+    @State private var selectedCoordinate: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: -12.0464, longitude: -77.0428)
+    @State private var selectedDistrito: String = "Lima"
+    @State private var selectedAddress: String = ""
+    @State private var isLoadingLocation: Bool = false
+
+    private let region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: -12.0464, longitude: -77.0428),
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
@@ -22,23 +29,45 @@ struct DashboardView: View {
             }
             .ignoresSafeArea()
 
+            if isLoadingLocation {
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.black.opacity(0.3))
+            }
+
             VStack {
                 Spacer()
 
                 HStack {
                     Spacer()
 
-                    Button {
-                        showCrearReporte = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.white)
-                            .frame(width: 56, height: 56)
-                            .background(Color.orange)
-                            .clipShape(Circle())
-                            .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                    VStack(spacing: 16) {
+                        Button {
+                            showBuscarReportes = true
+                        } label: {
+                            Image(systemName: "magnifyingglass")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.white)
+                                .frame(width: 56, height: 56)
+                                .background(Color.blue)
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                        }
+
+                        Button {
+                            showCrearReporte = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.white)
+                                .frame(width: 56, height: 56)
+                                .background(Color.orange)
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                        }
                     }
                     .padding(.trailing, 24)
                     .padding(.bottom, 32)
@@ -46,7 +75,15 @@ struct DashboardView: View {
             }
         }
         .fullScreenCover(isPresented: $showCrearReporte) {
-            CrearReporteView(isPresented: $showCrearReporte)
+            CrearReporteView(
+                isPresented: $showCrearReporte,
+                initialCoordinate: selectedCoordinate,
+                initialDistrito: selectedDistrito,
+                initialAddress: selectedAddress
+            )
+        }
+        .sheet(isPresented: $showBuscarReportes) {
+            BuscarReportesView(isPresented: $showBuscarReportes)
         }
     }
 }
