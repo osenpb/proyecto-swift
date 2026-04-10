@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseAuth
 
 struct ContentView: View {
     @State private var isAuthenticated: Bool = false
@@ -17,6 +18,9 @@ struct ContentView: View {
                     showRegister = true
                 }
             }
+        }
+        .onAppear {
+            isAuthenticated = Auth.auth().currentUser != nil
         }
         .animation(.easeInOut, value: isAuthenticated)
     }
