@@ -16,7 +16,7 @@ struct CrearReporteView: View {
     @State private var selectedDistrito: String
     @State private var address: String
     @State private var region = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: -12.0464, longitude: -77.0428),
+        center: CLLocationCoordinate2D(latitude: -11.9900664, longitude: -77.0611021),
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
     @State private var isSaving: Bool = false
@@ -30,7 +30,7 @@ struct CrearReporteView: View {
         self._selectedDistrito = State(initialValue: initialDistrito)
         self._address = State(initialValue: initialAddress)
 
-        let coord = initialCoordinate ?? CLLocationCoordinate2D(latitude: -12.0464, longitude: -77.0428)
+        let coord = initialCoordinate ?? CLLocationCoordinate2D(latitude: -11.9900664, longitude: -77.0611021)
         self._coordinate = State(initialValue: coord)
         self._region = State(initialValue: MKCoordinateRegion(
             center: coord,
@@ -152,15 +152,12 @@ struct CrearReporteView: View {
 
                         Button {
                             Task {
-                                isSaving = true
-                                try? await Task.sleep(nanoseconds: 1_000_000_000)
-                                isSaving = false
-                                isPresented = false
+                                await guardarReporte()
                             }
                         } label: {
                             PrimaryButton(title: "Reportar", isLoading: isSaving)
                         }
-                        .disabled(titulo.isEmpty)
+                        .disabled(titulo.isEmpty || isSaving)
                         .opacity(titulo.isEmpty ? 0.6 : 1)
                     }
                     .padding()
@@ -178,6 +175,32 @@ struct CrearReporteView: View {
             }
             .toolbarBackground(Color(hex: "1A1A2E"), for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
+        }
+    }
+
+    private func guardarReporte() async {
+        isSaving = true
+
+        let reporte = Reporte(
+            id: UUID(),
+            coordenada: coordinate,
+            titulo: titulo,
+            descripcion: descripcion,
+            tipo: selectedTipo,
+            distrito: selectedDistrito,
+            fecha: selectedDate,
+            usuarioId: nil
+        )
+
+        let viewModel = ReporteViewModel()
+        let success = await viewModel.crearReporte(reporte)
+
+        isSaving = false
+
+        if success {
+            isPresented = false
+        } else {
+            print("Error al guardar: \(viewModel.errorMessage ?? "Error desconocido")")
         }
     }
 }

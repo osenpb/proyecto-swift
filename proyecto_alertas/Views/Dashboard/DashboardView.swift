@@ -4,22 +4,29 @@ import CoreLocation
 
 struct DashboardView: View {
     @Binding var isAuthenticated: Bool
+    @StateObject private var reporteViewModel = ReporteViewModel()
     @State private var showCrearReporte: Bool = false
     @State private var showBuscarReportes: Bool = false
-    @State private var selectedCoordinate: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: -12.0464, longitude: -77.0428)
+    @State private var selectedCoordinate: CLLocationCoordinate2D
     @State private var selectedDistrito: String = "Lima"
     @State private var selectedAddress: String = ""
-    @State private var isLoadingLocation: Bool = false
 
-    private let region = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: -12.0464, longitude: -77.0428),
-        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-    )
+    init(isAuthenticated: Binding<Bool>) {
+        self._isAuthenticated = isAuthenticated
+        self._selectedCoordinate = State(initialValue: CLLocationCoordinate2D(latitude: -11.9900664, longitude: -77.0611021))
+    }
+
+    private var region: MKCoordinateRegion {
+        MKCoordinateRegion(
+            center: reporteViewModel.ubicacionDefault,
+            span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+        )
+    }
 
     var body: some View {
         ZStack {
             Map(position: .constant(.region(region))) {
-                ForEach(reportesDemo) { reporte in
+                ForEach(reporteViewModel.reportes) { reporte in
                     Annotation("", coordinate: reporte.coordenada) {
                         Image(systemName: "mappin.circle.fill")
                             .font(.title2)
@@ -29,7 +36,7 @@ struct DashboardView: View {
             }
             .ignoresSafeArea()
 
-            if isLoadingLocation {
+            if reporteViewModel.isLoading {
                 ProgressView()
                     .scaleEffect(1.5)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -57,6 +64,7 @@ struct DashboardView: View {
                         }
 
                         Button {
+                            selectedCoordinate = reporteViewModel.ubicacionDefault
                             showCrearReporte = true
                         } label: {
                             Image(systemName: "plus")
@@ -81,18 +89,25 @@ struct DashboardView: View {
                 initialDistrito: selectedDistrito,
                 initialAddress: selectedAddress
             )
+            .onDisappear {
+                Task {
+                    await reporteViewModel.obtenerReportes()
+                }
+            }
         }
         .sheet(isPresented: $showBuscarReportes) {
-            BuscarReportesView(isPresented: $showBuscarReportes)
+            BuscarReportesView(
+                isPresented: $showBuscarReportes,
+                //reportes: reporteViewModel.reportes
+            )
+        }
+        .onAppear {
+            Task {
+                await reporteViewModel.obtenerReportes()
+            }
         }
     }
 }
-
-private let reportesDemo: [Reporte] = [
-    Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.05, longitude: -77.03)),
-    Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.04, longitude: -77.05)),
-    Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.06, longitude: -77.04))
-]
 
 #Preview {
     DashboardView(isAuthenticated: .constant(true))
