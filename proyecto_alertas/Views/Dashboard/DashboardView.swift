@@ -13,7 +13,7 @@ struct DashboardView: View {
 
     init(isAuthenticated: Binding<Bool>) {
         self._isAuthenticated = isAuthenticated
-        self._selectedCoordinate = State(initialValue: CLLocationCoordinate2D(latitude: -11.9900664, longitude: -77.0611021))
+        self._selectedCoordinate = State(initialValue: CLLocationCoordinate2D(latitude: -12.0264, longitude: -77.0444))
     }
 
     private var region: MKCoordinateRegion {
@@ -25,13 +25,36 @@ struct DashboardView: View {
 
     var body: some View {
         ZStack {
-            Map(position: .constant(.region(region))) {
-                ForEach(reporteViewModel.reportes) { reporte in
-                    Annotation("", coordinate: reporte.coordenada) {
-                        Image(systemName: "mappin.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(.red)
+            MapReader { proxy in
+                ZStack {
+                    Map(position: .constant(.region(region))) {
+                        ForEach(reporteViewModel.reportes) { reporte in
+                            Annotation("", coordinate: reporte.coordenada) {
+                                Image(systemName: "mappin.circle.fill")
+                                    .font(.title2)
+                                    .foregroundStyle(.red)
+                            }
+                        }
                     }
+                    
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .simultaneousGesture(
+                            LongPressGesture(minimumDuration: 4)
+                                .sequenced(before: DragGesture(minimumDistance: 0))
+                                .onEnded { value in
+                                    switch value {
+                                    case .second(true, let drag):
+                                        if let location = drag?.location,
+                                           let coordinate = proxy.convert(location, from: .local) {
+                                            selectedCoordinate = coordinate
+                                            showCrearReporte = true
+                                        }
+                                    default:
+                                        break
+                                    }
+                                }
+                        )
                 }
             }
             .ignoresSafeArea()
@@ -97,7 +120,7 @@ struct DashboardView: View {
         }
         .sheet(isPresented: $showBuscarReportes) {
             BuscarReportesView(
-                isPresented: $showBuscarReportes,
+                isPresented: $showBuscarReportes
                 //reportes: reporteViewModel.reportes
             )
         }

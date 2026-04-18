@@ -11,7 +11,7 @@ final class ReporteViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
 
-    let ubicacionDefault = CLLocationCoordinate2D(latitude: -11.9900664, longitude: -77.0611021)
+    let ubicacionDefault = CLLocationCoordinate2D(latitude: -12.0264, longitude: -77.0444)
 
     private let db = Firestore.firestore()
 

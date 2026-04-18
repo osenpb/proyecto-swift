@@ -16,13 +16,13 @@ struct CrearReporteView: View {
     @State private var selectedDistrito: String
     @State private var address: String
     @State private var region = MKCoordinateRegion(
-        center: CLLocationCoordinate2D(latitude: -11.9900664, longitude: -77.0611021),
+        center: CLLocationCoordinate2D(latitude: -12.0264, longitude: -77.0444),
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
     @State private var isSaving: Bool = false
 
     private let tipos = ["Robo", "Asalto", "Robo de vehículo"]
-    private let distritos = ["Lima", "Cercado", "Miraflores", "San Juan de Lurigancho", "Callao", "Surco", "Barranco"]
+    private let distritos = ["Lima", "Independencia", "Cercado", "Miraflores", "San Juan de Lurigancho", "Callao", "Surco", "Barranco"]
 
     init(isPresented: Binding<Bool>, initialCoordinate: CLLocationCoordinate2D? = nil, initialDistrito: String = "Lima", initialAddress: String = "") {
         self._isPresented = isPresented
@@ -30,7 +30,7 @@ struct CrearReporteView: View {
         self._selectedDistrito = State(initialValue: initialDistrito)
         self._address = State(initialValue: initialAddress)
 
-        let coord = initialCoordinate ?? CLLocationCoordinate2D(latitude: -11.9900664, longitude: -77.0611021)
+        let coord = initialCoordinate ?? CLLocationCoordinate2D(latitude: -12.0264, longitude: -77.0444)
         self._coordinate = State(initialValue: coord)
         self._region = State(initialValue: MKCoordinateRegion(
             center: coord,
