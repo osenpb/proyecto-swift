@@ -20,9 +20,22 @@ struct CrearReporteView: View {
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
     @State private var isSaving: Bool = false
+    @State private var isLoadingDistrito: Bool = false
+
+    private let geocoder = CLGeocoder()
 
     private let tipos = ["Robo", "Asalto", "Robo de vehículo"]
-    private let distritos = ["Lima", "Independencia", "Cercado", "Miraflores", "San Juan de Lurigancho", "Callao", "Surco", "Barranco"]
+    private let distritos = [
+        "Lima", "Ancón", "Ate", "Barranco", "Bellavista", "Breña", "Callao",
+        "Carmen de la Legua Reynoso", "Chaclacayo", "Chorrillos", "Comas",
+        "El Agustino", "Independencia", "Jesús María", "La Molina", "La Perla",
+        "La Punta", "Lurigancho", "Lurín", "Magdalena del Mar", "Miraflores",
+        "Pachacámac", "Pucusana", "Pueblo Libre", "Puente Piedra", "Punta Hermosa",
+        "Punta Negra", "Rímac", "San Bartolo", "San Borja", "San Juan de Lurigancho",
+        "San Juan de Miraflores", "San Luis", "San Martín de Porres", "San Miguel",
+        "Santa Anita", "Santa María del Mar", "Santa Rosa", "Surco", "Surquillo",
+        "San Isidro", "Villa El Salvador", "Villa María del Triunfo"
+    ]
 
     init(isPresented: Binding<Bool>, initialCoordinate: CLLocationCoordinate2D? = nil, initialDistrito: String = "Lima", initialAddress: String = "") {
         self._isPresented = isPresented
@@ -36,6 +49,47 @@ struct CrearReporteView: View {
             center: coord,
             span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
         ))
+    }
+
+    private func obtenerDistritoDesdeCoordenada(_ coordinate: CLLocationCoordinate2D) async {
+        await MainActor.run {
+            isLoadingDistrito = true
+        }
+
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+
+        do {
+            let placemarks = try await geocoder.reverseGeocodeLocation(location)
+
+            guard let placemark = placemarks.first else {
+                await MainActor.run {
+                    isLoadingDistrito = false
+                }
+                return
+            }
+
+            let districtName = placemark.subLocality ?? placemark.locality ?? ""
+
+            if districtName.isEmpty {
+                await MainActor.run {
+                    isLoadingDistrito = false
+                }
+                return
+            }
+
+            let matchedDistrito = distritos.first { $0.lowercased() == districtName.lowercased() }
+
+            await MainActor.run {
+                if let match = matchedDistrito {
+                    selectedDistrito = match
+                }
+                isLoadingDistrito = false
+            }
+        } catch {
+            await MainActor.run {
+                isLoadingDistrito = false
+            }
+        }
     }
 
     var body: some View {
@@ -76,6 +130,9 @@ struct CrearReporteView: View {
                             .cornerRadius(12)
                             .onMapCameraChange(frequency: .onEnd) { context in
                                 self.coordinate = context.region.center
+                                Task {
+                                    await obtenerDistritoDesdeCoordenada(context.region.center)
+                                }
                             }
 
                             Text("Toca el mapa para mover el pin")
@@ -84,9 +141,17 @@ struct CrearReporteView: View {
                         }
 
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Distrito")
-                                .font(.headline)
-                                .foregroundStyle(.white)
+                            HStack {
+                                Text("Distrito")
+                                    .font(.headline)
+                                    .foregroundStyle(.white)
+
+                                if isLoadingDistrito {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .orange))
+                                        .scaleEffect(0.8)
+                                }
+                            }
 
                             Picker("Distrito", selection: $selectedDistrito) {
                                 ForEach(distritos, id: \.self) { distrito in
@@ -175,6 +240,9 @@ struct CrearReporteView: View {
             }
             .toolbarBackground(Color(hex: "1A1A2E"), for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
+        }
+        .task {
+            await obtenerDistritoDesdeCoordenada(coordinate)
         }
     }
 
