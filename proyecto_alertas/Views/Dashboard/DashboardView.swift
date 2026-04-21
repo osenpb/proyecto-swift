@@ -40,7 +40,7 @@ struct DashboardView: View {
                     Color.clear
                         .contentShape(Rectangle())
                         .simultaneousGesture(
-                            LongPressGesture(minimumDuration: 4)
+                            LongPressGesture(minimumDuration: 2)
                                 .sequenced(before: DragGesture(minimumDistance: 0))
                                 .onEnded { value in
                                     switch value {
