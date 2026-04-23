@@ -63,30 +63,65 @@ struct CrearReporteView: View {
 
             guard let placemark = placemarks.first else {
                 await MainActor.run {
+                    self.address = String(format: "%.4f, %.4f", coordinate.latitude, coordinate.longitude)
                     isLoadingDistrito = false
                 }
                 return
             }
 
-            let districtName = placemark.subLocality ?? placemark.locality ?? ""
+            var addressComponents: [String] = []
+            if let thoroughfare = placemark.thoroughfare, !thoroughfare.isEmpty {
+                addressComponents.append(thoroughfare)
+            }
+            if let subThoroughfare = placemark.subThoroughfare, !subThoroughfare.isEmpty {
+                addressComponents[0] += " \(subThoroughfare)"
+            }
+            if let locality = placemark.locality, !locality.isEmpty {
+                addressComponents.append(locality)
+            }
+            if let administrativeArea = placemark.administrativeArea, !administrativeArea.isEmpty {
+                addressComponents.append(administrativeArea)
+            }
+
+            let fullAddress = addressComponents.isEmpty ? "" : addressComponents.joined(separator: ", ")
+
+            let districtName = placemark.subLocality 
+            ?? placemark.subAdministrativeArea 
+            ?? placemark.locality ?? ""
 
             if districtName.isEmpty {
                 await MainActor.run {
+                    self.address = fullAddress.isEmpty
+                        ? String(format: "%.4f, %.4f", coordinate.latitude, coordinate.longitude)
+                        : fullAddress
                     isLoadingDistrito = false
                 }
                 return
             }
 
-            let matchedDistrito = distritos.first { $0.lowercased() == districtName.lowercased() }
+            let matchedDistrito = distritos.first {
+                districtName.lowercased().contains($0.lowercased()) ||
+                $0.lowercased().contains(districtName.lowercased())
+            }
 
             await MainActor.run {
                 if let match = matchedDistrito {
                     selectedDistrito = match
+                    if fullAddress.isEmpty {
+                        self.address = match
+                    } else {
+                        self.address = fullAddress
+                    }
+                } else {
+                    self.address = fullAddress.isEmpty
+                        ? String(format: "%.4f, %.4f", coordinate.latitude, coordinate.longitude)
+                        : fullAddress
                 }
                 isLoadingDistrito = false
             }
         } catch {
             await MainActor.run {
+                self.address = String(format: "%.4f, %.4f", coordinate.latitude, coordinate.longitude)
                 isLoadingDistrito = false
             }
         }
@@ -105,19 +140,29 @@ struct CrearReporteView: View {
                                 .font(.headline)
                                 .foregroundStyle(.white)
 
-                            if !address.isEmpty {
-                                HStack {
-                                    Image(systemName: "location.fill")
-                                        .foregroundStyle(.orange)
-                                    Text(address)
+                            HStack {
+                                Image(systemName: "location.fill")
+                                    .foregroundStyle(.orange)
+                                    .opacity(isLoadingDistrito ? 0.5 : 1)
+
+                                if isLoadingDistrito && address.isEmpty {
+                                    Text("Cargando ubicación...")
                                         .font(.subheadline)
-                                        .foregroundStyle(.white)
+                                        .foregroundStyle(.gray)
+                                } else {
+                                    Text(address.isEmpty
+                                        ? String(format: "%.4f, %.4f", coordinate.latitude, coordinate.longitude)
+                                        : address)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.white)
                                 }
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 12)
-                                .background(Color(hex: "2D2D44"))
-                                .cornerRadius(8)
+
+                                Spacer()
                             }
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 12)
+                            .background(Color(hex: "2D2D44"))
+                            .cornerRadius(8)
 
                             Map(position: .constant(.region(region))) {
                                 Annotation("", coordinate: coordinate) {
