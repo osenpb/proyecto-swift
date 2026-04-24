@@ -12,7 +12,17 @@ struct BuscarReportesView: View {
         Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.03, longitude: -77.06), titulo: "Intento de robo", descripcion: "Intentaron robarme en el metro", tipo: "Robo", distrito: "Cercado")
     ]
 
-    private let distritos = ["Lima", "Cercado", "Miraflores", "San Juan de Lurigancho", "Callao", "Surco", "Barranco"]
+    private let distritos = [
+        "Lima", "Ancón", "Ate", "Barranco", "Bellavista", "Breña", "Callao",
+        "Carmen de la Legua Reynoso", "Chaclacayo", "Chorrillos", "Comas",
+        "El Agustino", "Independencia", "Jesús María", "La Molina", "La Perla",
+        "La Punta", "Lurigancho", "Lurín", "Magdalena del Mar", "Miraflores",
+        "Pachacámac", "Pucusana", "Pueblo Libre", "Puente Piedra", "Punta Hermosa",
+        "Punta Negra", "Rímac", "San Bartolo", "San Borja", "San Juan de Lurigancho",
+        "San Juan de Miraflores", "San Luis", "San Martín de Porres", "San Miguel",
+        "Santa Anita", "Santa María del Mar", "Santa Rosa", "Surco", "Surquillo",
+        "San Isidro", "Villa El Salvador", "Villa María del Triunfo"
+    ]
 
     var reportesFiltrados: [Reporte] {
         var result = reportes
@@ -47,28 +57,26 @@ struct BuscarReportesView: View {
                     .cornerRadius(12)
                     .padding(.horizontal)
 
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
+                    HStack {
+                        Text("Distrito")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+
+                        Spacer()
+
+                        Picker("Distrito", selection: $selectedDistrito) {
+                            Text("Todos").tag(nil as String?)
                             ForEach(distritos, id: \.self) { distrito in
-                                Button {
-                                    if selectedDistrito == distrito {
-                                        selectedDistrito = nil
-                                    } else {
-                                        selectedDistrito = distrito
-                                    }
-                                } label: {
-                                    Text(distrito)
-                                        .font(.subheadline)
-                                        .padding(.horizontal, 16)
-                                        .padding(.vertical, 8)
-                                        .background(selectedDistrito == distrito ? Color.orange : Color(hex: "2D2D44"))
-                                        .foregroundStyle(.white)
-                                        .cornerRadius(20)
-                                }
+                                Text(distrito).tag(distrito as String?)
                             }
                         }
-                        .padding(.horizontal)
+                        .pickerStyle(.menu)
+                        .tint(.orange)
                     }
+                    .padding()
+                    .background(Color(hex: "2D2D44"))
+                    .cornerRadius(12)
+                    .padding(.horizontal)
 
                     ScrollView {
                         LazyVStack(spacing: 12) {
