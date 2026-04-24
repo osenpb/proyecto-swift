@@ -3,14 +3,9 @@ import MapKit
 
 struct BuscarReportesView: View {
     @Binding var isPresented: Bool
+    @StateObject private var viewModel = ReporteViewModel()
     @State private var searchText: String = ""
     @State private var selectedDistrito: String? = nil
-    @State private var reportes: [Reporte] = [
-        Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.05, longitude: -77.03), titulo: "Robo en tienda", descripcion: "Robo a mano armada en tienda de conveniencia", tipo: "Robo", distrito: "Miraflores"),
-        Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.04, longitude: -77.05), titulo: "Asalto en calle", descripcion: "Asalto a transeúnte", tipo: "Asalto", distrito: "Lima"),
-        Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.06, longitude: -77.04), titulo: "Robo de vehículo", descripcion: "Auto robado en estacionamiento", tipo: "Robo de vehículo", distrito: "Surco"),
-        Reporte(coordenada: CLLocationCoordinate2D(latitude: -12.03, longitude: -77.06), titulo: "Intento de robo", descripcion: "Intentaron robarme en el metro", tipo: "Robo", distrito: "Cercado")
-    ]
 
     private let distritos = [
         "Lima", "Ancón", "Ate", "Barranco", "Bellavista", "Breña", "Callao",
@@ -25,7 +20,7 @@ struct BuscarReportesView: View {
     ]
 
     var reportesFiltrados: [Reporte] {
-        var result = reportes
+        var result = viewModel.reportes
 
         if let distrito = selectedDistrito {
             result = result.filter { $0.distrito == distrito }
@@ -78,13 +73,32 @@ struct BuscarReportesView: View {
                     .cornerRadius(12)
                     .padding(.horizontal)
 
-                    ScrollView {
-                        LazyVStack(spacing: 12) {
-                            ForEach(reportesFiltrados) { reporte in
-                                ReporteCard(reporte: reporte)
-                            }
+                    if viewModel.isLoading {
+                        Spacer()
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .orange))
+                            .scaleEffect(1.5)
+                        Spacer()
+                    } else if reportesFiltrados.isEmpty {
+                        Spacer()
+                        VStack(spacing: 8) {
+                            Image(systemName: "doc.text.magnifyingglass")
+                                .font(.system(size: 40))
+                                .foregroundStyle(.gray)
+                            Text("No se encontraron reportes")
+                                .font(.headline)
+                                .foregroundStyle(.gray)
                         }
-                        .padding(.horizontal)
+                        Spacer()
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: 12) {
+                                ForEach(reportesFiltrados) { reporte in
+                                    ReporteCard(reporte: reporte)
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
                     }
                 }
                 .padding(.top, 8)
@@ -101,6 +115,9 @@ struct BuscarReportesView: View {
             }
             .toolbarBackground(Color(hex: "1A1A2E"), for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
+        }
+        .task {
+            await viewModel.obtenerReportes()
         }
     }
 }
