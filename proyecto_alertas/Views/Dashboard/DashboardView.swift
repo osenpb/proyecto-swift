@@ -1,12 +1,14 @@
 import SwiftUI
 import MapKit
 import CoreLocation
+import FirebaseAuth
 
 struct DashboardView: View {
     @Binding var isAuthenticated: Bool
     @StateObject private var reporteViewModel = ReporteViewModel()
     @State private var showCrearReporte: Bool = false
     @State private var showBuscarReportes: Bool = false
+    @State private var showCerrarSesion: Bool = false
     @State private var selectedCoordinate: CLLocationCoordinate2D
     @State private var selectedDistrito: String = "Lima"
     @State private var selectedAddress: String = ""
@@ -42,7 +44,27 @@ struct DashboardView: View {
                     }
                 }
                 
-                pinButton(geometry: geometry)
+VStack {
+                    HStack {
+                        Button {
+                            showCerrarSesion = true
+                        } label: {
+                            Image(systemName: "person.circle.fill")
+                                .font(.title)
+                                .foregroundStyle(.white)
+                                .frame(width: 44, height: 44)
+                                .background(Color(hex: "2D2D44").opacity(0.9))
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                        }
+                        .padding(.leading, 16)
+                        .padding(.top, 60)
+                        
+                        Spacer()
+                    }
+                    
+                    Spacer()
+                }
                 
                 if reporteViewModel.isLoading {
                     ProgressView()
@@ -113,6 +135,58 @@ struct DashboardView: View {
             BuscarReportesView(
                 isPresented: $showBuscarReportes
             )
+        }
+        .sheet(isPresented: $showCerrarSesion) {
+            ZStack {
+                Color(hex: "1A1A2E")
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 24) {
+                    Text("¿Cerrar sesión?")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.white)
+                    
+                    Text("Se cerrará tu sesión actual.")
+                        .font(.subheadline)
+                        .foregroundStyle(.gray)
+                        .multilineTextAlignment(.center)
+                    
+                    HStack(spacing: 16) {
+                        Button {
+                            showCerrarSesion = false
+                        } label: {
+                            Text("Cancelar")
+                                .font(.headline)
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color(hex: "2D2D44"))
+                                .cornerRadius(12)
+                        }
+                        
+                        Button {
+                            do {
+                                try Auth.auth().signOut()
+                                showCerrarSesion = false
+                                isAuthenticated = false
+                            } catch {
+                                print("Error al cerrar sesión: \(error.localizedDescription)")
+                            }
+                        } label: {
+                            Text("Cerrar sesión")
+                                .font(.headline)
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.red)
+                                .cornerRadius(12)
+                        }
+                    }
+                }
+                .padding(32)
+            }
+            .presentationDetents([.height(280)])
         }
         .onAppear {
             Task {
