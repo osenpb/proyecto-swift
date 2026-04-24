@@ -160,9 +160,10 @@ struct ReporteCard: View {
                     .font(.caption)
                     .foregroundStyle(.gray)
 
-                Text(reporte.distrito)
+                Text(!reporte.ubicacion.isEmpty ? reporte.ubicacion : reporte.distrito)
                     .font(.caption)
                     .foregroundStyle(.gray)
+                    .lineLimit(1)
             }
         }
         .padding()

@@ -34,6 +34,7 @@ final class ReporteViewModel: ObservableObject {
             "descripcion": reporte.descripcion,
             "tipo": reporte.tipo,
             "distrito": reporte.distrito,
+            "ubicacion": reporte.ubicacion,
             "latitud": reporte.coordenada.latitude,
             "longitud": reporte.coordenada.longitude,
             "fecha": Timestamp(date: reporte.fecha),
@@ -53,6 +54,7 @@ final class ReporteViewModel: ObservableObject {
             descripcion: data["descripcion"] as? String ?? "",
             tipo: data["tipo"] as? String ?? "Robo",
             distrito: data["distrito"] as? String ?? "Lima",
+            ubicacion: data["ubicacion"] as? String ?? "",
             fecha: timestamp?.dateValue() ?? Date(),
             usuarioId: data["usuarioId"] as? String
         )

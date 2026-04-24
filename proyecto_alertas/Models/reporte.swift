@@ -8,6 +8,7 @@ struct Reporte: Identifiable, Equatable {
     var descripcion: String = ""
     var tipo: String = "Robo"
     var distrito: String = "Lima"
+    var ubicacion: String = ""
     var fecha: Date = Date()
     var usuarioId: String?
 

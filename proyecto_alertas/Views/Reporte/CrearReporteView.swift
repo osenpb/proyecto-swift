@@ -301,6 +301,7 @@ struct CrearReporteView: View {
             descripcion: descripcion,
             tipo: selectedTipo,
             distrito: selectedDistrito,
+            ubicacion: address,
             fecha: selectedDate,
             usuarioId: nil
         )
