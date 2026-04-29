@@ -32,8 +32,8 @@ struct DashboardView: View {
                     Map(position: $mapPosition) {
                         ForEach(reporteViewModel.reportes) { reporte in
                             Annotation("", coordinate: reporte.coordenada) {
-                                Image(systemName: "mappin.circle.fill")
-                                    .font(.title2)
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.system(size: 30))
                                     .foregroundStyle(.red)
                             }
                         }
