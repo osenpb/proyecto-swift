@@ -44,13 +44,14 @@ struct DashboardView: View {
                     }
                 }
                 
-VStack {
+                VStack {
                     HStack {
                         Button {
                             showCerrarSesion = true
                         } label: {
-                            Image(systemName: "person.circle.fill")
-                                .font(.title)
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                                .font(.title2)
+                                .fontWeight(.semibold)
                                 .foregroundStyle(.white)
                                 .frame(width: 44, height: 44)
                                 .background(Color(hex: "2D2D44").opacity(0.9))
@@ -116,6 +117,8 @@ VStack {
                         .padding(.bottom, 32)
                     }
                 }
+                
+                pinButton(geometry: geometry)
             }
         }
         .fullScreenCover(isPresented: $showCrearReporte) {
